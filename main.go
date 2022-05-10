@@ -13,33 +13,36 @@ import (
 )
 
 type Typer struct {
-	buf *bytes.Buffer
-	bps uint8
+	buf  *bytes.Buffer
+	bps  uint8
+	last byte
 }
 
-func NewTyper(bps uint8) Typer {
-	return Typer{new(bytes.Buffer), bps}
+func NewTyper(bps uint8) *Typer {
+	return &Typer{new(bytes.Buffer), bps, 0}
 }
 
-func (t Typer) Write(p []byte) (n int, err error) {
+func (t *Typer) Write(p []byte) (n int, err error) {
 	return t.buf.Write(p)
 }
 
-func (t Typer) Read(p []byte) (n int, err error) {
+func (t *Typer) Read(p []byte) (n int, err error) {
 	next, err := t.buf.ReadByte()
-	delay := time.Second / time.Duration(t.bps)
-	r := rune(next)
-
 	if errors.Is(err, io.EOF) {
 		return 0, err
 	}
 
-	if unicode.IsSpace(r) {
+	rNext, rLast := rune(next), rune(t.last)
+	delay := time.Second / time.Duration(t.bps)
+	if rNext == rLast {
+		delay /= 2
+	} else if unicode.IsSpace(rNext) {
 		delay /= 3
-	} else if unicode.IsDigit(r) {
+	} else if unicode.IsDigit(rNext) {
 		delay *= 2
 	}
 
+	t.last = next
 	time.Sleep(delay)
 	return copy(p, []byte{next}), err
 }
