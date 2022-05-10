@@ -12,12 +12,12 @@ import (
 )
 
 type Typer struct {
-	buf  *bytes.Buffer
-	rate time.Duration
+	buf *bytes.Buffer
+	bps uint8
 }
 
-func NewTyper(rate time.Duration) Typer {
-	return Typer{new(bytes.Buffer), rate}
+func NewTyper(bps uint8) Typer {
+	return Typer{new(bytes.Buffer), bps}
 }
 
 func (t Typer) Write(p []byte) (n int, err error) {
@@ -26,7 +26,7 @@ func (t Typer) Write(p []byte) (n int, err error) {
 
 func (t Typer) Read(p []byte) (n int, err error) {
 	next, err := t.buf.ReadByte()
-	delay := t.rate
+	delay := time.Second / time.Duration(t.bps)
 	r := rune(next)
 
 	if errors.Is(err, io.EOF) {
@@ -44,7 +44,7 @@ func (t Typer) Read(p []byte) (n int, err error) {
 }
 
 func main() {
-	typer := NewTyper(time.Millisecond * 100)
+	typer := NewTyper(10)
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
