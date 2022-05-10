@@ -3,18 +3,21 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"time"
+	"unicode"
 )
 
 type Typer struct {
-	buf *bytes.Buffer
+	buf  *bytes.Buffer
+	rate time.Duration
 }
 
-func NewTyper() Typer {
-	return Typer{new(bytes.Buffer)}
+func NewTyper(rate time.Duration) Typer {
+	return Typer{new(bytes.Buffer), rate}
 }
 
 func (t Typer) Write(p []byte) (n int, err error) {
@@ -22,13 +25,26 @@ func (t Typer) Write(p []byte) (n int, err error) {
 }
 
 func (t Typer) Read(p []byte) (n int, err error) {
-	time.Sleep(time.Millisecond * 100)
 	next, err := t.buf.ReadByte()
+	delay := t.rate
+	r := rune(next)
+
+	if errors.Is(err, io.EOF) {
+		return 0, err
+	}
+
+	if unicode.IsSpace(r) {
+		delay /= 3
+	} else if unicode.IsDigit(r) {
+		delay *= 2
+	}
+
+	time.Sleep(delay)
 	return copy(p, []byte{next}), err
 }
 
 func main() {
-	typer := NewTyper()
+	typer := NewTyper(time.Millisecond * 100)
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
