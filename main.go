@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -44,7 +45,10 @@ func (t Typer) Read(p []byte) (n int, err error) {
 }
 
 func main() {
-	typer := NewTyper(10)
+	rate := flag.Uint("r", 10, "average amount of bps (bytes per second)")
+	flag.Parse()
+
+	typer := NewTyper(uint8(*rate))
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
