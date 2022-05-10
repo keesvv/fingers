@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"time"
@@ -12,7 +14,7 @@ type Typer struct {
 }
 
 func NewTyper() Typer {
-	return Typer{bytes.NewBuffer(make([]byte, 0))}
+	return Typer{new(bytes.Buffer)}
 }
 
 func (t Typer) Write(p []byte) (n int, err error) {
@@ -22,17 +24,15 @@ func (t Typer) Write(p []byte) (n int, err error) {
 func (t Typer) Read(p []byte) (n int, err error) {
 	time.Sleep(time.Millisecond * 100)
 	next, err := t.buf.ReadByte()
-
-	if err != nil {
-		return 0, err
-	}
-
-	copy(p, []byte{next})
-	return 1, nil
+	return copy(p, []byte{next}), err
 }
 
 func main() {
 	typer := NewTyper()
-	io.Copy(typer, os.Stdin)
-	io.Copy(os.Stdout, typer)
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for scanner.Scan() {
+		fmt.Fprintln(typer, scanner.Text())
+		io.Copy(os.Stdout, typer)
+	}
 }
