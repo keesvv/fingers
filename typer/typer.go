@@ -47,7 +47,10 @@ func (t *Typer) Write(p []byte) (n int, err error) {
 				typo = rune(b)
 			}
 
-			buf = append(buf, []byte{byte(typo), '\b', b}...)
+			buf = append(buf, byte(typo))
+			if t.config.Autofix {
+				buf = append(buf, []byte{'\b', b}...)
+			}
 			continue
 		}
 

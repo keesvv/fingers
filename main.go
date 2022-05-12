@@ -16,6 +16,7 @@ func main() {
 	rate := flag.Uint("r", 10, "average amount of bps (bytes per second)")
 	precision := flag.Uint("p", 90, "precision percentage")
 	layout := flag.String("l", "qwerty", "keyboard layout")
+	autofix := flag.Bool("f", true, "autofix typos")
 	flag.Parse()
 
 	kbLayout := keyboard.GetLayoutByID(*layout)
@@ -25,6 +26,7 @@ func main() {
 
 	t := typer.NewTyper(&typer.Config{
 		Layout:    kbLayout,
+		Autofix:   *autofix,
 		Bps:       uint8(*rate),
 		Precision: uint8(*precision),
 	})
