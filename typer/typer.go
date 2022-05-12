@@ -6,17 +6,20 @@ import (
 	"math/big"
 	"time"
 	"unicode"
+
+	"keesvv.nl/fingers/keyboard"
 )
 
 type Typer struct {
 	buf       *bytes.Buffer
+	layout    *keyboard.Layout
 	bps       uint8
 	precision uint8
 	last      byte
 }
 
-func NewTyper(bps, precision uint8) *Typer {
-	return &Typer{new(bytes.Buffer), bps, precision, 0}
+func NewTyper(bps, precision uint8, layout *keyboard.Layout) *Typer {
+	return &Typer{new(bytes.Buffer), layout, bps, precision, 0}
 }
 
 func (t *Typer) typo() bool {
@@ -43,24 +46,7 @@ func (t *Typer) Write(p []byte) (n int, err error) {
 		if unicode.In(
 			rune(b), unicode.Letter, /*unicode.Digit,*/
 		) && t.typo() {
-			var typo rune
-
-			qwerty := [][]rune{
-				[]rune("qwertyuiop"),
-				[]rune("asdfghjkl"),
-				[]rune("zxcvbnm"),
-			}
-
-			for rowIndex, row := range qwerty {
-				for keyIndex, key := range row {
-					if rune(b) == key {
-						typo = rune(qwerty[rowIndex][keyIndex-1])
-						break
-					}
-				}
-				break
-			}
-
+			typo := t.layout.GetAdjacent(rune(b), -1, 0)
 			if typo == 0 {
 				typo = rune(b)
 			}

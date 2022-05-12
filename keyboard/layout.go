@@ -10,6 +10,13 @@ var QwertyLayout = &Layout{[][]rune{
 	[]rune("zxcvbnm"),
 }}
 
+func GetLayoutByID(id string) *Layout {
+	if id == "qwerty" {
+		return QwertyLayout // FIXME
+	}
+	return nil
+}
+
 func (l *Layout) GetLoc(r rune) (x, y int) {
 	for rowIndex, row := range l.Keys {
 		for keyIndex, key := range row {
