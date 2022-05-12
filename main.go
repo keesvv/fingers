@@ -23,9 +23,13 @@ func main() {
 		panic(errors.New("no such layout")) // FIXME
 	}
 
-	t := typer.NewTyper(uint8(*rate), uint8(*precision), kbLayout)
-	scanner := bufio.NewScanner(os.Stdin)
+	t := typer.NewTyper(&typer.Config{
+		Layout:    kbLayout,
+		Bps:       uint8(*rate),
+		Precision: uint8(*precision),
+	})
 
+	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		fmt.Fprintln(t, scanner.Text())
 		io.Copy(os.Stdout, t)

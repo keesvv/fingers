@@ -6,28 +6,24 @@ import (
 	"math/big"
 	"time"
 	"unicode"
-
-	"keesvv.nl/fingers/keyboard"
 )
 
 type Typer struct {
-	buf       *bytes.Buffer
-	layout    *keyboard.Layout
-	bps       uint8
-	precision uint8
-	last      byte
+	buf    *bytes.Buffer
+	config *Config
+	last   byte
 }
 
-func NewTyper(bps, precision uint8, layout *keyboard.Layout) *Typer {
-	return &Typer{new(bytes.Buffer), layout, bps, precision, 0}
+func NewTyper(config *Config) *Typer {
+	return &Typer{new(bytes.Buffer), config, 0}
 }
 
 func (t *Typer) typo() bool {
-	if t.precision >= 100 {
+	if t.config.Precision >= 100 {
 		return false
 	}
 
-	if t.precision == 0 {
+	if t.config.Precision == 0 {
 		return true
 	}
 
@@ -36,7 +32,7 @@ func (t *Typer) typo() bool {
 		panic(err)
 	}
 
-	return n.Cmp(big.NewInt(int64(t.precision))) >= 0
+	return n.Cmp(big.NewInt(int64(t.config.Precision))) >= 0
 }
 
 func (t *Typer) Write(p []byte) (n int, err error) {
@@ -46,7 +42,7 @@ func (t *Typer) Write(p []byte) (n int, err error) {
 		if unicode.In(
 			rune(b), unicode.Letter, /*unicode.Digit,*/
 		) && t.typo() {
-			typo := t.layout.GetAdjacent(rune(b), -1, 0)
+			typo := t.config.Layout.GetAdjacent(rune(b), -1, 0)
 			if typo == 0 {
 				typo = rune(b)
 			}
@@ -68,7 +64,7 @@ func (t *Typer) Read(p []byte) (n int, err error) {
 	}
 
 	rNext, rLast := rune(next), rune(t.last)
-	delay := time.Second / time.Duration(t.bps)
+	delay := time.Second / time.Duration(t.config.Bps)
 	switch {
 	case rNext == rLast && unicode.IsGraphic(rNext), unicode.IsSpace(rNext):
 		delay /= 2
