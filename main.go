@@ -49,7 +49,9 @@ func (t *Typer) Write(p []byte) (n int, err error) {
 	for _, b := range p {
 		buf = append(buf, b)
 
-		if unicode.IsLetter(rune(b)) && t.typo() {
+		if unicode.In(
+			rune(b), unicode.Letter, unicode.Digit,
+		) && t.typo() {
 			buf = append(buf, []byte{'\b', b}...)
 		}
 	}
