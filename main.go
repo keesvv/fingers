@@ -67,14 +67,13 @@ func (t *Typer) Read(p []byte) (n int, err error) {
 
 	rNext, rLast := rune(next), rune(t.last)
 	delay := time.Second / time.Duration(t.bps)
-	if rNext == rLast {
+	switch {
+	case rNext == rLast, unicode.IsSpace(rNext):
 		delay /= 2
-	} else if rLast == '\b' {
-		delay *= 3
-	} else if unicode.IsSpace(rNext) {
-		delay /= 3
-	} else if unicode.IsDigit(rNext) {
+	case unicode.IsDigit(rNext):
 		delay *= 2
+	case rLast == '\b':
+		delay *= 3
 	}
 
 	t.last = next
