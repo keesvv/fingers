@@ -1,14 +1,12 @@
 package keyboard
 
-type Layout struct {
-	Keys [][]rune
-}
+type Layout [][]rune
 
-var QwertyLayout = &Layout{[][]rune{
+var QwertyLayout = &Layout{
 	[]rune("qwertyuiop"),
 	[]rune("asdfghjkl"),
 	[]rune("zxcvbnm"),
-}}
+}
 
 func GetLayoutByID(id string) *Layout {
 	if id == "qwerty" {
@@ -18,7 +16,7 @@ func GetLayoutByID(id string) *Layout {
 }
 
 func (l *Layout) GetLoc(r rune) (x, y int) {
-	for rowIndex, row := range l.Keys {
+	for rowIndex, row := range *l {
 		for keyIndex, key := range row {
 			if r == key {
 				return keyIndex, rowIndex
@@ -29,7 +27,7 @@ func (l *Layout) GetLoc(r rune) (x, y int) {
 }
 
 func (l *Layout) GetKey(x, y int) rune {
-	return l.Keys[y][x]
+	return (*l)[y][x]
 }
 
 func (l *Layout) GetAdjacent(r rune, x, y int) rune {
