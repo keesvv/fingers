@@ -44,17 +44,17 @@ func (t *Typer) typo() bool {
 }
 
 func (t *Typer) Write(p []byte) (n int, err error) {
+	var buf []byte
+
 	for _, b := range p {
-		t.buf.WriteByte(b)
-		n++
+		buf = append(buf, b)
 
 		if unicode.IsLetter(rune(b)) && t.typo() {
-			typo := []byte{'\b', b}
-			t.buf.Write(typo)
-			n += len(typo)
+			buf = append(buf, []byte{'\b', b}...)
 		}
 	}
-	return
+
+	return t.buf.Write(buf)
 }
 
 func (t *Typer) Read(p []byte) (n int, err error) {
