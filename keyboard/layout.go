@@ -20,3 +20,12 @@ func (l *Layout) GetLoc(r rune) (x, y int) {
 	}
 	return -1, -1
 }
+
+func (l *Layout) GetKey(x, y int) rune {
+	return l.Keys[y][x]
+}
+
+func (l *Layout) GetAdjacent(r rune, x, y int) rune {
+	oX, oY := l.GetLoc(r)
+	return l.GetKey(oX+x, oY+y)
+}
