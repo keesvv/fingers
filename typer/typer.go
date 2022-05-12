@@ -40,13 +40,36 @@ func (t *Typer) Write(p []byte) (n int, err error) {
 	var buf []byte
 
 	for _, b := range p {
-		buf = append(buf, b)
-
 		if unicode.In(
-			rune(b), unicode.Letter, unicode.Digit,
+			rune(b), unicode.Letter, /*unicode.Digit,*/
 		) && t.typo() {
-			buf = append(buf, []byte{'\b', b}...)
+			var typo rune
+
+			qwerty := [][]rune{
+				[]rune("qwertyuiop"),
+				[]rune("asdfghjkl"),
+				[]rune("zxcvbnm"),
+			}
+
+			for rowIndex, row := range qwerty {
+				for keyIndex, key := range row {
+					if rune(b) == key {
+						typo = rune(qwerty[rowIndex][keyIndex-1])
+						break
+					}
+				}
+				break
+			}
+
+			if typo == 0 {
+				typo = rune(b)
+			}
+
+			buf = append(buf, []byte{byte(typo), '\b', b}...)
+			continue
 		}
+
+		buf = append(buf, b)
 	}
 
 	return t.buf.Write(buf)
