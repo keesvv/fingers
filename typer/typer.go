@@ -3,8 +3,6 @@ package typer
 import (
 	"bytes"
 	"crypto/rand"
-	"errors"
-	"io"
 	"math/big"
 	"time"
 	"unicode"
@@ -35,8 +33,7 @@ func (t *Typer) typo() bool {
 		panic(err)
 	}
 
-	cmp := n.Cmp(big.NewInt(int64(t.precision)))
-	return cmp == 1 || cmp == 0
+	return n.Cmp(big.NewInt(int64(t.precision))) >= 0
 }
 
 func (t *Typer) Write(p []byte) (n int, err error) {
@@ -57,7 +54,7 @@ func (t *Typer) Write(p []byte) (n int, err error) {
 
 func (t *Typer) Read(p []byte) (n int, err error) {
 	next, err := t.buf.ReadByte()
-	if errors.Is(err, io.EOF) {
+	if err != nil {
 		return 0, err
 	}
 
@@ -78,5 +75,5 @@ func (t *Typer) Read(p []byte) (n int, err error) {
 
 	t.last = next
 	time.Sleep(delay)
-	return copy(p, []byte{next}), err
+	return copy(p, []byte{next}), nil
 }
