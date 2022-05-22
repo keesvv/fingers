@@ -68,7 +68,8 @@ func (t *Typer) Read(p []byte) (n int, err error) {
 	switch {
 	case rNext == rLast && unicode.IsGraphic(rNext), unicode.IsSpace(rNext):
 		delay /= 2
-	case unicode.IsDigit(rNext):
+	case unicode.IsDigit(rNext),
+		rLast == '\n':
 		delay *= 2
 	case rNext == '\b':
 		delay *= 3
