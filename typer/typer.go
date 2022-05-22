@@ -39,22 +39,19 @@ func (t *Typer) Write(p []byte) (n int, err error) {
 	var buf []byte
 
 	for _, b := range p {
-		if unicode.In(
-			rune(b), unicode.Letter, /*unicode.Digit,*/
-		) && t.typo() {
+		if unicode.IsLetter(rune(b)) && t.typo() {
 			typo := t.config.Layout.GetAdjacent(rune(b), -1, 0)
 			if typo == 0 {
-				typo = rune(b)
+				typo = t.config.Layout.GetAdjacent(rune(b), 1, 0)
 			}
 
 			buf = append(buf, byte(typo))
 			if t.config.Autofix {
 				buf = append(buf, []byte{'\b', b}...)
 			}
-			continue
+		} else {
+			buf = append(buf, b)
 		}
-
-		buf = append(buf, b)
 	}
 
 	return t.buf.Write(buf)
